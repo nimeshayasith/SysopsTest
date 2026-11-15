@@ -41,6 +41,15 @@ resource "aws_vpc_security_group_ingress_rule" "web_ssh_admin" {
   ip_protocol       = "tcp"
 }
 
+# Terraform removes the default allow-all egress rule, so add it back for
+# apt updates, package installs and the connection to RDS.
+resource "aws_vpc_security_group_egress_rule" "web_all_outbound" {
+  security_group_id = aws_security_group.web.id
+  description       = "Allow all outbound traffic"
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+}
+
 resource "aws_security_group" "db" {
   name        = "${var.name_prefix}-db-sg"
   description = "Allow MySQL only from instances attached to web-sg."
