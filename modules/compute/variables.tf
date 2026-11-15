@@ -24,6 +24,11 @@ variable "instance_name" {
   type        = string
 }
 
+variable "name_tag" {
+  description = "Name tag prefix for the instance, volume and EIP (must start with sysops-<firstname>-)."
+  type        = string
+}
+
 variable "instance_type" {
   description = "EC2 instance type."
   type        = string

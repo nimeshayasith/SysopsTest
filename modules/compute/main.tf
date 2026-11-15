@@ -21,7 +21,7 @@ resource "aws_instance" "web" {
     delete_on_termination = true
 
     tags = {
-      Name = "${var.instance_name}-root-volume"
+      Name = "${var.name_tag}-root-volume"
     }
   }
 
@@ -43,7 +43,7 @@ resource "aws_instance" "web" {
   CLOUD_CONFIG
 
   tags = {
-    Name = var.instance_name
+    Name = var.name_tag
     Role = "WebServer"
   }
 }
@@ -52,7 +52,7 @@ resource "aws_eip" "web" {
   domain = "vpc"
 
   tags = {
-    Name = "${var.instance_name}-eip"
+    Name = "${var.name_tag}-eip"
   }
 }
 

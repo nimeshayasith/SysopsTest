@@ -66,5 +66,19 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-# Private subnets deliberately keep the VPC's main route table (local route only).
-# No NAT gateway or public default route is created.
+# Private route table: local route only (no NAT gateway, no default route).
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.this.id
+
+  tags = {
+    Name = "${var.vpc_name}-private-rt"
+    Tier = "Private"
+  }
+}
+
+resource "aws_route_table_association" "private" {
+  for_each = aws_subnet.private
+
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.private.id
+}

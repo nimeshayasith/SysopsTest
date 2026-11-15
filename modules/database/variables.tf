@@ -4,8 +4,9 @@ variable "db_identifier" {
 }
 
 variable "db_name" {
-  description = "Initial database name."
+  description = "Initial database name. Null creates none."
   type        = string
+  default     = null
 }
 
 variable "db_username" {

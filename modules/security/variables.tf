@@ -1,3 +1,8 @@
+variable "name_prefix" {
+  description = "Resource name prefix, e.g. sysops-nimesha."
+  type        = string
+}
+
 variable "vpc_id" {
   description = "VPC in which to create security groups."
   type        = string

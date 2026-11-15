@@ -1,11 +1,16 @@
 resource "aws_security_group" "web" {
-  name        = "web-sg"
+  name        = "${var.name_prefix}-web-sg"
   description = "Allow HTTP/HTTPS from the internet and SSH from the administrator IP."
   vpc_id      = var.vpc_id
 
   tags = {
-    Name = "web-sg"
+    Name = "${var.name_prefix}-web-sg"
     Tier = "Web"
+  }
+
+  # Create the new group and re-attach the instance before the old one is deleted.
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -37,13 +42,17 @@ resource "aws_vpc_security_group_ingress_rule" "web_ssh_admin" {
 }
 
 resource "aws_security_group" "db" {
-  name        = "db-sg"
+  name        = "${var.name_prefix}-db-sg"
   description = "Allow MySQL only from instances attached to web-sg."
   vpc_id      = var.vpc_id
 
   tags = {
-    Name = "db-sg"
+    Name = "${var.name_prefix}-db-sg"
     Tier = "Database"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 

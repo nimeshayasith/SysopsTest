@@ -4,6 +4,18 @@ variable "aws_region" {
   default     = "ap-southeast-1"
 }
 
+variable "name_prefix" {
+  description = "Prefix for every resource name (exam rule: sysops-<firstname>)."
+  type        = string
+  default     = "sysops-nimesha"
+}
+
+variable "hosted_zone_id" {
+  description = "Route 53 hosted zone ID for saberion.cloud. Leave null if you have no access; then give the Elastic IP to the evaluator."
+  type        = string
+  default     = null
+}
+
 variable "admin_ssh_cidr" {
   description = "Your current public IPv4 address in CIDR notation, for example 203.0.113.10/32."
   type        = string
@@ -38,7 +50,7 @@ variable "db_password" {
 }
 
 variable "db_name" {
-  description = "Initial MySQL database name."
+  description = "Initial MySQL database name. Null = none; the site databases are created manually with SQL."
   type        = string
-  default     = "sysopsdb"
+  default     = null
 }

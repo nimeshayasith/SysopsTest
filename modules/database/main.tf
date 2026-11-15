@@ -12,6 +12,7 @@ resource "aws_db_subnet_group" "this" {
 resource "aws_db_instance" "this" {
   identifier        = var.db_identifier
   engine            = "mysql"
+  engine_version    = "8.0"
   instance_class    = var.instance_class
   allocated_storage = var.allocated_storage
   storage_type      = "gp3"
@@ -28,7 +29,7 @@ resource "aws_db_instance" "this" {
   multi_az               = var.multi_az
 
   # Test/lab settings to keep the deployment inexpensive and easy to remove.
-  backup_retention_period = 0
+  backup_retention_period = 1
   deletion_protection     = false
   skip_final_snapshot     = true
 
