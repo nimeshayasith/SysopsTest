@@ -1,0 +1,41 @@
+== Bare IP (must show no site: 444 / empty reply) ==
+curl exit/http: 000
+(http code 000 = connection closed with no reply)
+
+== Unknown host name ==
+http: 000
+
+== config.php must not be downloadable: website1 ==
+http: 404
+
+== config.php must not be downloadable: website2 ==
+http: 404
+
+== config.php must not be downloadable: website3 ==
+http: 404
+
+== Response headers (no nginx/PHP version) ==
+HTTP/1.1 200 OK
+Server: nginx
+
+== website1 page (Task 8) ==
+Database: Connected
+Site: Website 1 - Company Website (site1_db)
+Message: Welcome to Northwind Digital. This message is stored in site1_db.
+Visit count: 20
+
+== website2 page (Task 8) ==
+Database: Connected
+Site: Website 2 - Online Shopping (site2_db)
+Message: Welcome to Cartly Shop. This message is stored in site2_db.
+Visit count: 16
+
+== website3 page (Task 8) ==
+Database: Connected
+Site: Website 3 - Learning Management System (site3_db)
+Message: Welcome to BrightPath Learning. This message is stored in site3_db.
+Visit count: 7
+
+== Refresh increases the count (website3, two requests) ==
+Visit count: 8
+Visit count: 9

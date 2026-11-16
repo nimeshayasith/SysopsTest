@@ -1,0 +1,152 @@
+== EC2 instance ==
+{
+    "Type": "t3.micro",
+    "AZ": "ap-southeast-1a",
+    "Subnet": "subnet-03bed74cebed910ed",
+    "PublicIp": "47.130.163.143",
+    "IMDS": "required",
+    "SGs": [
+        "sysops-nimesha-web-sg"
+    ],
+    "Tags": [
+        {
+            "K": "Owner",
+            "V": "Nimesha Yasith"
+        },
+        {
+            "K": "Project",
+            "V": "SysOpsTest"
+        },
+        {
+            "K": "Name",
+            "V": "sysops-nimesha-web01"
+        }
+    ]
+}
+== Root volume ==
+[
+    {
+        "Size": 20,
+        "Type": "gp3",
+        "Encrypted": true
+    }
+]
+== Elastic IP ==
+[
+    {
+        "Ip": "47.130.163.143",
+        "Instance": "i-00cfa6baefc478667",
+        "Name": "sysops-nimesha-web01-eip"
+    }
+]
+== VPC and subnets ==
+[
+    {
+        "Cidr": "10.10.0.0/16",
+        "Name": "sysops-nimesha-vpc"
+    }
+]
+----------------------------------------------------------------------------------
+|                                 DescribeSubnets                                |
++-----------------+---------------+----------------+-----------------------------+
+|       AZ        | AutoPublicIp  |     Cidr       |            Name             |
++-----------------+---------------+----------------+-----------------------------+
+|  ap-southeast-1b|  False        |  10.10.12.0/24 |  sysops-nimesha-private-b   |
+|  ap-southeast-1b|  True         |  10.10.2.0/24  |  sysops-nimesha-public-b    |
+|  ap-southeast-1a|  True         |  10.10.1.0/24  |  sysops-nimesha-public-a    |
+|  ap-southeast-1a|  False        |  10.10.11.0/24 |  sysops-nimesha-private-a   |
++-----------------+---------------+----------------+-----------------------------+
+== NAT gateways (should be none) ==
+[]
+== Route tables ==
+[
+    {
+        "Name": null,
+        "Routes": [
+            {
+                "Dest": "10.10.0.0/16",
+                "Target": "local"
+            }
+        ],
+        "Subnets": 0
+    },
+    {
+        "Name": "sysops-nimesha-vpc-public-rt",
+        "Routes": [
+            {
+                "Dest": "10.10.0.0/16",
+                "Target": "local"
+            },
+            {
+                "Dest": "0.0.0.0/0",
+                "Target": "igw-0b58ac4e49e4892b1"
+            }
+        ],
+        "Subnets": 2
+    },
+    {
+        "Name": "sysops-nimesha-vpc-private-rt",
+        "Routes": [
+            {
+                "Dest": "10.10.0.0/16",
+                "Target": "local"
+            }
+        ],
+        "Subnets": 2
+    }
+]
+== Security groups ==
+[
+    {
+        "Name": "sysops-nimesha-web-sg",
+        "Inbound": [
+            {
+                "Port": 80,
+                "Cidr": "0.0.0.0/0",
+                "FromSG": null
+            },
+            {
+                "Port": 22,
+                "Cidr": "116.206.246.65/32",
+                "FromSG": null
+            },
+            {
+                "Port": 443,
+                "Cidr": "0.0.0.0/0",
+                "FromSG": null
+            }
+        ]
+    },
+    {
+        "Name": "sysops-nimesha-db-sg",
+        "Inbound": [
+            {
+                "Port": 3306,
+                "Cidr": null,
+                "FromSG": "sg-06f045ef02963cde4"
+            }
+        ]
+    }
+]
+== RDS ==
+{
+    "Id": "sysops-nimesha-db",
+    "Engine": "mysql",
+    "Version": "8.0.46-rds.20260908",
+    "Class": "db.t3.micro",
+    "MultiAZ": false,
+    "Storage": 20,
+    "StorageType": "gp3",
+    "Encrypted": true,
+    "Public": false,
+    "BackupDays": 1,
+    "DeletionProtection": false,
+    "Status": "available",
+    "SubnetAZs": [
+        "ap-southeast-1b",
+        "ap-southeast-1a"
+    ],
+    "SGs": [
+        "sg-06b472572f116d13e"
+    ]
+}
