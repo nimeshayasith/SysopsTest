@@ -7,5 +7,5 @@ return [
     'port'      => 3306,
     'name'      => 'site3_db',
     'user'      => 'site3_user',
-    'pass'      => 'CHANGE_ME_SITE3',
+    'pass'      => '',   // set on the server only (never commit it)
 ];

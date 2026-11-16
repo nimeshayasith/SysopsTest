@@ -86,6 +86,16 @@ One server block per site in `sites-available/`, enabled by symlink; default sit
 
 Every site has a dynamic `index.php` (the default page) and a static `about.html`. The footer **System status** panel on each home page shows **Connected**, the site name, the message stored in the site's own database, and a visit counter that rises on each refresh. Tables are created and seeded automatically on the first visit. Database passwords live only in each site's `config.php` on the server.
 
+**How the cart is stored (Website 2).** Cart data is saved in the database, not in the browser. Each browser gets a random `cart_id` kept in its session cookie. Each row of `cart_items` holds one product for that `cart_id`, and adding the same product again raises `qty` on the same row. Checkout copies the cart into `orders` and `order_items` in one transaction and then empties that cart. So data survives page reloads and web server restarts, because it lives in RDS.
+
+| Table (`site2_db`) | Holds |
+|---|---|
+| `products` | The shop catalogue |
+| `cart_items` | Items currently in a cart (`cart_id`, `product_id`, `qty`, `added_at`) |
+| `orders` | One row per completed checkout (customer, email, address, total) |
+| `order_items` | The lines of each order |
+| `visits`, `messages` | Visit counter and the status message |
+
 ## 3. Repository layout
 
 ```text
@@ -281,6 +291,17 @@ Inside `setup-vhosts.sh`:
 | `mysql -h <rds-endpoint> -u sysopsadmin -p -e "SHOW DATABASES;"` | `-e` runs one statement and exits | Lists databases to confirm the three exist |
 | `mysql --no-defaults -h <rds-endpoint> -u site1_user -p -e "USE site2_db"` | Tries to open another site's database as `site1_user` | **Must fail with "Access denied"**, which proves each user is isolated. `--no-defaults` ignores `~/.my.cnf` so the right user is used |
 | `mysql ... -u site2_user -p site2_db -e "SELECT * FROM orders;"` | The last word selects the database to use | Shows that checkout saved an order |
+| `mysql --no-defaults -h $DB -u site2_user -p site2_db -e "SHOW TABLES;"` | Lists the tables in one site's database | Confirms the tables were created |
+| `mysql --no-defaults -h $DB -u site2_user -p site2_db -e "SELECT c.cart_id, p.name, c.qty, p.price FROM cart_items c JOIN products p ON p.id = c.product_id;"` | Joins the cart to the product names and prices | Shows what is in the carts right now |
+| `mysql --no-defaults -h $DB -u site2_user -p site2_db -e "SELECT * FROM cart_items; SELECT id, customer_name, total FROM orders; SELECT * FROM visits;"` | Shows the cart, orders and visit counter together | The "before and after" proof: run it, change something on the site, run it again |
+
+**Prove the data is saved:** run the last query, add items to the cart in the browser, then run the same query again. The new rows appear in `cart_items`. After checkout a row appears in `orders` and the cart is empty. Refreshing the home page raises the `visits` total.
+
+**If `$DB` is empty** (a new SSH session loses it), the command runs as `mysql -h -u ...` and fails with `Unknown MySQL server host '-u'` or prints a long `Usage: mysql [OPTIONS]` help text. Set it again, or save it once so it is always available:
+```bash
+DB=sysops-nimesha-db.ct0gkqqme0ya.ap-southeast-1.rds.amazonaws.com
+echo 'export DB=sysops-nimesha-db.ct0gkqqme0ya.ap-southeast-1.rds.amazonaws.com' >> ~/.bashrc
+```
 
 Useful statements typed at the `mysql>` prompt:
 
@@ -337,7 +358,8 @@ What `db/setup.sql` contains: `CREATE DATABASE`, `CREATE USER ... IDENTIFIED BY`
 
 | Command | What it does |
 |---|---|
-| `DB=<rds-endpoint>` then `$DB` | Stores a value in a variable so it is not retyped |
+| `DB=<rds-endpoint>` then `$DB` | Stores a value in a variable so it is not retyped. It is lost when the SSH session ends, so check with `echo $DB` |
+| `echo 'export DB=...' >> ~/.bashrc` | Appends the line to the startup file so every new session has `$DB` |
 | `for n in 1 2 3; do ...; done` | Repeats a command for each site |
 | `command1 \| command2` | Sends the output of the first command into the second |
 | `command > file` | Saves output to a file (used to collect `docs/evidence/`) |
@@ -358,6 +380,8 @@ What `db/setup.sql` contains: `CREATE DATABASE`, `CREATE USER ... IDENTIFIED BY`
 | `export VAR = value` failed | Spaces around `=` in Bash | `export VAR='value'` |
 | Password with `#` in `.my.cnf` | `#` starts a comment in MySQL option files | Wrap the password in double quotes |
 | Password with `@` rejected by RDS | RDS disallows `@`, `/`, `"` and spaces | Chose a compliant password |
+| `Unknown MySQL server host '-u'`, or a long `Usage: mysql` help text | The `$DB` shortcut was empty after opening a new SSH session, so `-h $DB -u ...` became `-h -u ...` | Set `DB=...` again (check with `echo $DB`), or save it in `~/.bashrc` |
+| Chrome left `debug.log` crash files in the repo | Headless Chrome screenshots write a log to the current folder | Deleted them and added `debug.log` to `.gitignore` |
 
 ## 8. Security notes
 
