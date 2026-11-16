@@ -7,3 +7,4 @@ crash.*.log
 terraform.tfvars
 *.pem
 saberion-sysops-exam-instructions.md
+debug.log
